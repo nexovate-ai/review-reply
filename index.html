@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReviewReply - AI Review Response Generator for Dental Practices</title>
+  <meta name="description" content="Generate professional, compliant responses to patient reviews in seconds. Free AI-powered tool for dental practices and agencies." />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --brand-600: #2563eb;
+      --brand-700: #1d4ed8;
+    }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f8fafc; }
+    .star { cursor: pointer; transition: color 0.15s; }
+    .star.active { color: #f59e0b; }
+    .star.inactive { color: #d1d5db; }
+    .copy-btn:active { transform: scale(0.95); }
+    .fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .spinner { border: 3px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.6s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <span class="text-xl font-bold text-gray-900">ReviewReply</span>
+        <span class="text-sm text-gray-500 ml-2">by Nexovate</span>
+      </div>
+      <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">Free Tool</span>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="bg-white border-b border-gray-100">
+    <div class="max-w-3xl mx-auto px-4 py-10 text-center">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">
+        Respond to Patient Reviews in Seconds
+      </h1>
+      <p class="text-gray-600 text-lg max-w-xl mx-auto">
+        Paste a Google or Yelp review below. Our AI generates a professional,
+        compliant response tailored for dental practices.
+      </p>
+    </div>
+  </section>
+
+  <!-- Main Tool -->
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    <form id="review-form" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5">
+
+      <!-- Practice Name (optional) -->
+      <div>
+        <label for="practice-name" class="block text-sm font-medium text-gray-700 mb-1">
+          Practice Name <span class="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <input
+          id="practice-name"
+          type="text"
+          placeholder="e.g. Bright Smile Dental"
+          maxlength="100"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+        />
+      </div>
+
+      <!-- Star Rating -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Star Rating</label>
+        <div id="star-rating" class="flex gap-1 text-3xl" role="radiogroup" aria-label="Star rating">
+          <span class="star inactive" data-value="1" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+          <span class="star inactive" data-value="2" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+          <span class="star inactive" data-value="3" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+          <span class="star inactive" data-value="4" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+          <span class="star inactive" data-value="5" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+        </div>
+        <input type="hidden" id="rating-value" value="" />
+      </div>
+
+      <!-- Review Text -->
+      <div>
+        <label for="review-text" class="block text-sm font-medium text-gray-700 mb-1">
+          Review Text
+        </label>
+        <textarea
+          id="review-text"
+          rows="5"
+          maxlength="2000"
+          placeholder="Paste the patient review here..."
+          class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
+          required
+        ></textarea>
+        <div class="text-xs text-gray-400 text-right mt-1">
+          <span id="char-count">0</span>/2000
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <button
+        type="submit"
+        id="generate-btn"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Generate Response
+      </button>
+    </form>
+
+    <!-- Response Output -->
+    <div id="response-section" class="hidden mt-6 fade-in">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-gray-900">Generated Response</h2>
+          <button
+            id="copy-btn"
+            class="copy-btn text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md transition-colors font-medium"
+          >
+            Copy to clipboard
+          </button>
+        </div>
+        <div id="response-text" class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-md p-4 border border-gray-100"></div>
+        <div class="mt-2 text-xs text-gray-400">
+          Model: <span id="model-used"></span> &middot; Always review before posting
+        </div>
+      </div>
+
+      <!-- CTA: Email Capture -->
+      <div id="cta-section" class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+          Want a full Review Health Analysis?
+        </h3>
+        <p class="text-sm text-gray-600 mb-4">
+          Get a free audit of your practice's online reputation &mdash; response rates,
+          risk areas, and actionable recommendations.
+        </p>
+        <form id="capture-form" class="flex gap-2 max-w-md mx-auto">
+          <input
+            id="capture-email"
+            type="email"
+            placeholder="you@yourpractice.com"
+            required
+            class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          />
+          <button
+            type="submit"
+            id="capture-btn"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors whitespace-nowrap"
+          >
+            Get Free Audit
+          </button>
+        </form>
+        <div id="capture-success" class="hidden mt-3 text-sm text-green-700 font-medium">
+          We'll send your Review Health Analysis within 24 hours.
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-section" class="hidden mt-6 text-center py-8">
+      <div class="spinner mx-auto mb-3"></div>
+      <p class="text-sm text-gray-500">Generating your response...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-section" class="hidden mt-6 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="max-w-3xl mx-auto px-4 py-8 text-center text-xs text-gray-400 border-t border-gray-100 mt-12">
+    <p>&copy; 2026 Nexovate. AI-generated responses should always be reviewed before posting.</p>
+  </footer>
+
+  <script>
+    // --- Star Rating ---
+    const stars = document.querySelectorAll('#star-rating .star');
+    const ratingInput = document.getElementById('rating-value');
+    let selectedRating = 0;
+
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        selectedRating = parseInt(star.dataset.value);
+        ratingInput.value = selectedRating;
+        updateStars();
+      });
+      star.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          star.click();
+        }
+      });
+    });
+
+    function updateStars() {
+      stars.forEach(s => {
+        const val = parseInt(s.dataset.value);
+        s.classList.toggle('active', val <= selectedRating);
+        s.classList.toggle('inactive', val > selectedRating);
+        s.setAttribute('aria-checked', val <= selectedRating ? 'true' : 'false');
+      });
+    }
+
+    // --- Character Count ---
+    const reviewText = document.getElementById('review-text');
+    const charCount = document.getElementById('char-count');
+    reviewText.addEventListener('input', () => {
+      charCount.textContent = reviewText.value.length;
+    });
+
+    // --- Generate Response ---
+    const form = document.getElementById('review-form');
+    const generateBtn = document.getElementById('generate-btn');
+    const responseSection = document.getElementById('response-section');
+    const loadingSection = document.getElementById('loading-section');
+    const errorSection = document.getElementById('error-section');
+    const responseTextEl = document.getElementById('response-text');
+    const modelUsedEl = document.getElementById('model-used');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const text = reviewText.value.trim();
+      if (!text) return;
+      if (!selectedRating) {
+        showError('Please select a star rating.');
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px;vertical-align:middle;"></span> Generating...';
+      responseSection.classList.add('hidden');
+      errorSection.classList.add('hidden');
+      loadingSection.classList.remove('hidden');
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reviewText: text,
+            rating: selectedRating,
+            practiceName: document.getElementById('practice-name').value.trim(),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Something went wrong');
+        }
+
+        responseTextEl.textContent = data.response;
+        modelUsedEl.textContent = data.model === 'sonnet' ? 'Claude Sonnet (detailed)' : 'Claude Haiku (fast)';
+        loadingSection.classList.add('hidden');
+        responseSection.classList.remove('hidden');
+        responseSection.classList.add('fade-in');
+      } catch (err) {
+        loadingSection.classList.add('hidden');
+        showError(err.message);
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Generate Response';
+      }
+    });
+
+    function showError(msg) {
+      errorSection.textContent = msg;
+      errorSection.classList.remove('hidden');
+    }
+
+    // --- Copy to Clipboard ---
+    document.getElementById('copy-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('copy-btn');
+      try {
+        await navigator.clipboard.writeText(responseTextEl.textContent);
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy to clipboard'; }, 2000);
+      } catch {
+        btn.textContent = 'Failed to copy';
+        setTimeout(() => { btn.textContent = 'Copy to clipboard'; }, 2000);
+      }
+    });
+
+    // --- Email Capture ---
+    const captureForm = document.getElementById('capture-form');
+    const captureSuccess = document.getElementById('capture-success');
+
+    captureForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('capture-email').value.trim();
+      if (!email) return;
+
+      const btn = document.getElementById('capture-btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      try {
+        await fetch('/api/capture', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            practiceName: document.getElementById('practice-name').value.trim(),
+            source: 'review-reply',
+          }),
+        });
+
+        captureForm.classList.add('hidden');
+        captureSuccess.classList.remove('hidden');
+      } catch {
+        btn.disabled = false;
+        btn.textContent = 'Get Free Audit';
+      }
+    });
+  </script>
+</body>
+</html>
