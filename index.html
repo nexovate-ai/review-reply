@@ -51,33 +51,6 @@
       --noise-opacity: 0.03;
     }
 
-    .dark {
-      --bg-primary: #0b1120;
-      --bg-secondary: #111827;
-      --bg-tertiary: #1a2332;
-      --bg-accent: #38bdf8;
-      --bg-accent-hover: #56c8fa;
-      --bg-accent-subtle: rgba(56,189,248,0.1);
-      --bg-card: #151f2e;
-      --text-primary: #f1f5f9;
-      --text-secondary: #cbd5e1;
-      --text-tertiary: #94a3b8;
-      --text-inverse: #0b1120;
-      --text-accent: #38bdf8;
-      --border-primary: #1e293b;
-      --border-subtle: #1a2332;
-      --green-text: #4ade80;
-      --green-bg: rgba(74,222,128,0.1);
-      --red-bg: rgba(239,68,68,0.08);
-      --red-border: rgba(239,68,68,0.2);
-      --red-text: #fca5a5;
-      --star-active: #fbbf24;
-      --star-inactive: #374151;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.25);
-      --noise-opacity: 0.02;
-    }
-
     body {
       font-family: var(--font-body);
       background: var(--bg-primary);
@@ -102,7 +75,6 @@
       backdrop-filter: blur(12px);
       transition: background var(--transition), border-color var(--transition);
     }
-    .dark .header { background: rgba(11,17,32,0.85); }
     .header-inner {
       max-width: 700px;
       margin: 0 auto;
@@ -148,25 +120,6 @@
       border-radius: 100px;
       letter-spacing: 0.02em;
     }
-    .theme-toggle {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      border: 1px solid var(--border-primary);
-      background: var(--bg-tertiary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      transition: background var(--transition), border-color var(--transition);
-    }
-    .theme-toggle:hover { background: var(--bg-accent-subtle); }
-    .dark .theme-toggle { border-color: #475569; background: #1e293b; color: #e2e8f0; }
-    .dark .theme-toggle:hover { background: #334155; }
-    .light .theme-toggle .icon-light { display: none; }
-    .dark .theme-toggle .icon-dark { display: none; }
-
     /* ---- Hero ---- */
     .hero {
       background: var(--bg-secondary);
@@ -464,10 +417,6 @@
       </div>
       <div class="header-right">
         <span class="badge-free">Free Tool</span>
-        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-          <span class="icon-dark">&#9790;</span>
-          <span class="icon-light">&#9728;</span>
-        </button>
       </div>
     </div>
   </header>
@@ -572,25 +521,6 @@
   </footer>
 
   <script>
-    // ---- Theme Toggle ----
-    (function() {
-      const root = document.documentElement;
-      const toggle = document.getElementById('theme-toggle');
-      const stored = localStorage.getItem('nexovate-theme');
-
-      if (stored) {
-        root.className = stored;
-      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        root.className = 'dark';
-      }
-
-      toggle.addEventListener('click', () => {
-        const next = root.classList.contains('dark') ? 'light' : 'dark';
-        root.className = next;
-        localStorage.setItem('nexovate-theme', next);
-      });
-    })();
-
     // ---- Star Rating ----
     const stars = document.querySelectorAll('#star-rating .star');
     const ratingInput = document.getElementById('rating-value');
