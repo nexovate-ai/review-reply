@@ -1,178 +1,597 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ReviewReply - AI Review Response Generator for Dental Practices</title>
+  <title>Review Reply — AI Review Response Generator for Dental Practices</title>
   <meta name="description" content="Generate professional, compliant responses to patient reviews in seconds. Free AI-powered tool for dental practices and agencies." />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <meta property="og:title" content="Review Reply — AI Review Responses in Seconds" />
+  <meta property="og:description" content="Paste a patient review, get a professional, patient-respectful response. Free tool for dental practices and agencies." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230c4a6e'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-weight='bold' fill='white'>N</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --brand-600: #2563eb;
-      --brand-700: #1d4ed8;
+      --font-heading: 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --transition: 0.2s ease;
     }
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f8fafc; }
-    .star { cursor: pointer; transition: color 0.15s; }
-    .star.active { color: #f59e0b; }
-    .star.inactive { color: #d1d5db; }
-    .copy-btn:active { transform: scale(0.95); }
-    .fade-in { animation: fadeIn 0.3s ease-in; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .spinner { border: 3px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.6s linear infinite; display: inline-block; }
+
+    .light {
+      --bg-primary: #fafbfc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f4f8;
+      --bg-accent: #0c4a6e;
+      --bg-accent-hover: #0a3d5c;
+      --bg-accent-subtle: #e8f4f8;
+      --bg-card: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      --text-inverse: #ffffff;
+      --text-accent: #0c4a6e;
+      --border-primary: #e2e8f0;
+      --border-subtle: #f1f5f9;
+      --green-text: #166534;
+      --green-bg: #dcfce7;
+      --red-bg: #fef2f2;
+      --red-border: #fecaca;
+      --red-text: #991b1b;
+      --star-active: #d97706;
+      --star-inactive: #d1d5db;
+      --shadow-sm: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.03);
+      --shadow-md: 0 4px 16px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
+      --noise-opacity: 0.03;
+    }
+
+    .dark {
+      --bg-primary: #0b1120;
+      --bg-secondary: #111827;
+      --bg-tertiary: #1a2332;
+      --bg-accent: #38bdf8;
+      --bg-accent-hover: #56c8fa;
+      --bg-accent-subtle: rgba(56,189,248,0.1);
+      --bg-card: #151f2e;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-tertiary: #94a3b8;
+      --text-inverse: #0b1120;
+      --text-accent: #38bdf8;
+      --border-primary: #1e293b;
+      --border-subtle: #1a2332;
+      --green-text: #4ade80;
+      --green-bg: rgba(74,222,128,0.1);
+      --red-bg: rgba(239,68,68,0.08);
+      --red-border: rgba(239,68,68,0.2);
+      --red-text: #fca5a5;
+      --star-active: #fbbf24;
+      --star-inactive: #374151;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.25);
+      --noise-opacity: 0.02;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    h1, h2, h3 { font-family: var(--font-heading); line-height: 1.2; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-primary);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .dark .header { background: rgba(11,17,32,0.85); }
+    .header-inner {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-title {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.125rem;
+      color: var(--text-primary);
+    }
+    .header-by {
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+    }
+    .header-by a {
+      color: var(--text-accent);
+      font-weight: 500;
+      transition: opacity var(--transition);
+    }
+    .header-by a:hover { opacity: 0.8; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge-free {
+      font-family: var(--font-heading);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: var(--text-accent);
+      background: var(--bg-accent-subtle);
+      padding: 4px 12px;
+      border-radius: 100px;
+      letter-spacing: 0.02em;
+    }
+    .theme-toggle {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border-primary);
+      background: var(--bg-tertiary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .theme-toggle:hover { background: var(--bg-accent-subtle); }
+    .dark .theme-toggle { border-color: #475569; background: #1e293b; color: #e2e8f0; }
+    .dark .theme-toggle:hover { background: #334155; }
+    .light .theme-toggle .icon-light { display: none; }
+    .dark .theme-toggle .icon-dark { display: none; }
+
+    /* ---- Hero ---- */
+    .hero {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .hero-inner {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(1.5rem, 4vw, 1.875rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* ---- Main Tool ---- */
+    .main { max-width: 700px; margin: 0 auto; padding: 32px 24px 64px; }
+
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .field { margin-bottom: 20px; }
+    .field-label {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .field-hint {
+      font-weight: 400;
+      color: var(--text-tertiary);
+      font-family: var(--font-body);
+    }
+    .field-input {
+      width: 100%;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+    .field-input:focus {
+      border-color: var(--bg-accent);
+      box-shadow: 0 0 0 3px var(--bg-accent-subtle);
+    }
+    .field-input::placeholder { color: var(--text-tertiary); }
+
+    textarea.field-input { resize: vertical; min-height: 120px; }
+
+    .char-count {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    /* Star rating */
+    .stars {
+      display: flex;
+      gap: 4px;
+    }
+    .star {
+      font-size: 1.75rem;
+      cursor: pointer;
+      color: var(--star-inactive);
+      transition: color 0.15s, transform 0.15s;
+      user-select: none;
+      line-height: 1;
+    }
+    .star:hover { transform: scale(1.1); }
+    .star.active { color: var(--star-active); }
+
+    /* Generate button */
+    .generate-btn {
+      width: 100%;
+      font-family: var(--font-heading);
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--text-inverse);
+      background: var(--bg-accent);
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 24px;
+      cursor: pointer;
+      transition: background var(--transition), transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .generate-btn:hover { background: var(--bg-accent-hover); transform: translateY(-1px); }
+    .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---- Response Output ---- */
+    .response-card {
+      margin-top: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-md);
+      animation: fadeUp 0.35s ease;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .response-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .response-label {
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .copy-btn {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-primary);
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition), transform 0.1s;
+    }
+    .copy-btn:hover { background: var(--bg-accent-subtle); border-color: var(--text-accent); }
+    .copy-btn:active { transform: scale(0.96); }
+    .response-text {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border-subtle);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .response-meta {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ---- CTA Section ---- */
+    .cta-card {
+      margin-top: 24px;
+      background: var(--bg-accent-subtle);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      text-align: center;
+      animation: fadeUp 0.4s ease;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .cta-card h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .cta-card p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .cta-form {
+      display: flex;
+      gap: 8px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .cta-form .field-input { flex: 1; }
+    .cta-form button {
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--text-inverse);
+      background: var(--bg-accent);
+      border: none;
+      border-radius: var(--radius);
+      padding: 11px 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition);
+    }
+    .cta-form button:hover { background: var(--bg-accent-hover); }
+    .cta-success {
+      display: none;
+      margin-top: 12px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--green-text);
+    }
+
+    /* ---- Loading ---- */
+    .loading-section {
+      display: none;
+      margin-top: 24px;
+      text-align: center;
+      padding: 40px 0;
+    }
+    .loading-spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border-primary);
+      border-top-color: var(--bg-accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin: 0 auto 12px;
+    }
+    .loading-text { font-size: 0.875rem; color: var(--text-tertiary); }
+
+    /* ---- Error ---- */
+    .error-section {
+      display: none;
+      margin-top: 24px;
+      background: var(--red-bg);
+      border: 1px solid var(--red-border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      font-size: 0.875rem;
+      color: var(--red-text);
+    }
+
+    /* ---- Footer ---- */
+    .footer {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      border-top: 1px solid var(--border-primary);
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      transition: border-color var(--transition);
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 640px) {
+      .hero-inner { padding: 36px 20px 28px; }
+      .main { padding: 24px 16px 48px; }
+      .tool-card, .response-card, .cta-card { padding: 20px; }
+      .cta-form { flex-direction: column; }
+    }
   </style>
 </head>
-<body class="min-h-screen">
+<body>
 
   <!-- Header -->
-  <header class="bg-white border-b border-gray-200">
-    <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div>
-        <span class="text-xl font-bold text-gray-900">ReviewReply</span>
-        <span class="text-sm text-gray-500 ml-2">by Nexovate</span>
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <span class="header-title">Review Reply</span>
+        <span class="header-by">by <a href="https://webrouge.com" target="_blank" rel="noopener">Nexovate</a></span>
       </div>
-      <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">Free Tool</span>
+      <div class="header-right">
+        <span class="badge-free">Free Tool</span>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+          <span class="icon-dark">&#9790;</span>
+          <span class="icon-light">&#9728;</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <!-- Hero -->
-  <section class="bg-white border-b border-gray-100">
-    <div class="max-w-3xl mx-auto px-4 py-10 text-center">
-      <h1 class="text-3xl font-bold text-gray-900 mb-3">
-        Respond to Patient Reviews in Seconds
-      </h1>
-      <p class="text-gray-600 text-lg max-w-xl mx-auto">
-        Paste a Google or Yelp review below. Our AI generates a professional,
-        compliant response tailored for dental practices.
-      </p>
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>Respond to Patient Reviews in Seconds</h1>
+      <p>Paste a Google or Yelp review below. Our AI generates a professional, compliant response tailored for dental practices.</p>
     </div>
   </section>
 
   <!-- Main Tool -->
-  <main class="max-w-3xl mx-auto px-4 py-8">
-    <form id="review-form" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5">
-
-      <!-- Practice Name (optional) -->
-      <div>
-        <label for="practice-name" class="block text-sm font-medium text-gray-700 mb-1">
-          Practice Name <span class="text-gray-400 font-normal">(optional)</span>
+  <main class="main">
+    <form id="review-form" class="tool-card">
+      <div class="field">
+        <label for="practice-name" class="field-label">
+          Practice Name <span class="field-hint">(optional)</span>
         </label>
         <input
           id="practice-name"
           type="text"
           placeholder="e.g. Bright Smile Dental"
           maxlength="100"
-          class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          class="field-input"
         />
       </div>
 
-      <!-- Star Rating -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Star Rating</label>
-        <div id="star-rating" class="flex gap-1 text-3xl" role="radiogroup" aria-label="Star rating">
-          <span class="star inactive" data-value="1" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
-          <span class="star inactive" data-value="2" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
-          <span class="star inactive" data-value="3" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
-          <span class="star inactive" data-value="4" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
-          <span class="star inactive" data-value="5" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+      <div class="field">
+        <label class="field-label">Star Rating</label>
+        <div id="star-rating" class="stars" role="radiogroup" aria-label="Star rating">
+          <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+          <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+          <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+          <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
+          <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">&#9733;</span>
         </div>
         <input type="hidden" id="rating-value" value="" />
       </div>
 
-      <!-- Review Text -->
-      <div>
-        <label for="review-text" class="block text-sm font-medium text-gray-700 mb-1">
-          Review Text
-        </label>
+      <div class="field">
+        <label for="review-text" class="field-label">Review Text</label>
         <textarea
           id="review-text"
           rows="5"
           maxlength="2000"
           placeholder="Paste the patient review here..."
-          class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
+          class="field-input"
           required
         ></textarea>
-        <div class="text-xs text-gray-400 text-right mt-1">
-          <span id="char-count">0</span>/2000
-        </div>
+        <div class="char-count"><span id="char-count">0</span>/2000</div>
       </div>
 
-      <!-- Generate Button -->
-      <button
-        type="submit"
-        id="generate-btn"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
+      <button type="submit" id="generate-btn" class="generate-btn">
         Generate Response
       </button>
     </form>
 
     <!-- Response Output -->
-    <div id="response-section" class="hidden mt-6 fade-in">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-semibold text-gray-900">Generated Response</h2>
-          <button
-            id="copy-btn"
-            class="copy-btn text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md transition-colors font-medium"
-          >
-            Copy to clipboard
-          </button>
+    <div id="response-section" class="hidden">
+      <div class="response-card">
+        <div class="response-header">
+          <span class="response-label">Generated Response</span>
+          <button id="copy-btn" class="copy-btn">Copy to clipboard</button>
         </div>
-        <div id="response-text" class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-md p-4 border border-gray-100"></div>
-        <div class="mt-2 text-xs text-gray-400">
+        <div id="response-text" class="response-text"></div>
+        <div class="response-meta">
           Model: <span id="model-used"></span> &middot; Always review before posting
         </div>
       </div>
 
-      <!-- CTA: Email Capture -->
-      <div id="cta-section" class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">
-          Want a full Review Health Analysis?
-        </h3>
-        <p class="text-sm text-gray-600 mb-4">
+      <!-- CTA -->
+      <div id="cta-section" class="cta-card">
+        <h3>Want a full Review Health Analysis?</h3>
+        <p>
           Get a free audit of your practice's online reputation &mdash; response rates,
           risk areas, and actionable recommendations.
         </p>
-        <form id="capture-form" class="flex gap-2 max-w-md mx-auto">
-          <input
-            id="capture-email"
-            type="email"
-            placeholder="you@yourpractice.com"
-            required
-            class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          />
-          <button
-            type="submit"
-            id="capture-btn"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors whitespace-nowrap"
-          >
-            Get Free Audit
-          </button>
+        <form id="capture-form" class="cta-form">
+          <input id="capture-email" type="email" placeholder="you@yourpractice.com" required class="field-input" />
+          <button type="submit" id="capture-btn">Get Free Audit</button>
         </form>
-        <div id="capture-success" class="hidden mt-3 text-sm text-green-700 font-medium">
+        <div id="capture-success" class="cta-success">
           We'll send your Review Health Analysis within 24 hours.
         </div>
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div id="loading-section" class="hidden mt-6 text-center py-8">
-      <div class="spinner mx-auto mb-3"></div>
-      <p class="text-sm text-gray-500">Generating your response...</p>
+    <!-- Loading -->
+    <div id="loading-section" class="loading-section">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Generating your response...</p>
     </div>
 
-    <!-- Error State -->
-    <div id="error-section" class="hidden mt-6 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700"></div>
+    <!-- Error -->
+    <div id="error-section" class="error-section"></div>
   </main>
 
   <!-- Footer -->
-  <footer class="max-w-3xl mx-auto px-4 py-8 text-center text-xs text-gray-400 border-t border-gray-100 mt-12">
-    <p>&copy; 2026 Nexovate. AI-generated responses should always be reviewed before posting.</p>
+  <footer class="footer">
+    <p>&copy; 2026 <a href="https://webrouge.com" target="_blank" rel="noopener" style="color: var(--text-accent);">Nexovate</a>. AI-generated responses should always be reviewed before posting.</p>
   </footer>
 
   <script>
-    // --- Star Rating ---
+    // ---- Theme Toggle ----
+    (function() {
+      const root = document.documentElement;
+      const toggle = document.getElementById('theme-toggle');
+      const stored = localStorage.getItem('nexovate-theme');
+
+      if (stored) {
+        root.className = stored;
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        root.className = 'dark';
+      }
+
+      toggle.addEventListener('click', () => {
+        const next = root.classList.contains('dark') ? 'light' : 'dark';
+        root.className = next;
+        localStorage.setItem('nexovate-theme', next);
+      });
+    })();
+
+    // ---- Star Rating ----
     const stars = document.querySelectorAll('#star-rating .star');
     const ratingInput = document.getElementById('rating-value');
     let selectedRating = 0;
@@ -195,19 +614,18 @@
       stars.forEach(s => {
         const val = parseInt(s.dataset.value);
         s.classList.toggle('active', val <= selectedRating);
-        s.classList.toggle('inactive', val > selectedRating);
         s.setAttribute('aria-checked', val <= selectedRating ? 'true' : 'false');
       });
     }
 
-    // --- Character Count ---
+    // ---- Character Count ----
     const reviewText = document.getElementById('review-text');
     const charCount = document.getElementById('char-count');
     reviewText.addEventListener('input', () => {
       charCount.textContent = reviewText.value.length;
     });
 
-    // --- Generate Response ---
+    // ---- Generate Response ----
     const form = document.getElementById('review-form');
     const generateBtn = document.getElementById('generate-btn');
     const responseSection = document.getElementById('response-section');
@@ -227,10 +645,10 @@
       }
 
       generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px;vertical-align:middle;"></span> Generating...';
+      generateBtn.innerHTML = '<span class="spinner"></span> Generating...';
       responseSection.classList.add('hidden');
-      errorSection.classList.add('hidden');
-      loadingSection.classList.remove('hidden');
+      errorSection.style.display = 'none';
+      loadingSection.style.display = 'block';
 
       try {
         const res = await fetch('/api/generate', {
@@ -251,24 +669,23 @@
 
         responseTextEl.textContent = data.response;
         modelUsedEl.textContent = data.model === 'sonnet' ? 'Claude Sonnet (detailed)' : 'Claude Haiku (fast)';
-        loadingSection.classList.add('hidden');
+        loadingSection.style.display = 'none';
         responseSection.classList.remove('hidden');
-        responseSection.classList.add('fade-in');
       } catch (err) {
-        loadingSection.classList.add('hidden');
+        loadingSection.style.display = 'none';
         showError(err.message);
       } finally {
         generateBtn.disabled = false;
-        generateBtn.textContent = 'Generate Response';
+        generateBtn.innerHTML = 'Generate Response';
       }
     });
 
     function showError(msg) {
       errorSection.textContent = msg;
-      errorSection.classList.remove('hidden');
+      errorSection.style.display = 'block';
     }
 
-    // --- Copy to Clipboard ---
+    // ---- Copy to Clipboard ----
     document.getElementById('copy-btn').addEventListener('click', async () => {
       const btn = document.getElementById('copy-btn');
       try {
@@ -281,7 +698,7 @@
       }
     });
 
-    // --- Email Capture ---
+    // ---- Email Capture ----
     const captureForm = document.getElementById('capture-form');
     const captureSuccess = document.getElementById('capture-success');
 
@@ -305,8 +722,8 @@
           }),
         });
 
-        captureForm.classList.add('hidden');
-        captureSuccess.classList.remove('hidden');
+        captureForm.style.display = 'none';
+        captureSuccess.style.display = 'block';
       } catch {
         btn.disabled = false;
         btn.textContent = 'Get Free Audit';
